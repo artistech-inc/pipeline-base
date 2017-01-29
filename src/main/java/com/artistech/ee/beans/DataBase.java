@@ -211,6 +211,7 @@ public class DataBase {
     }
 
     public final void setProc(ExternalProcess value) {
+        index += 1;
         proc = value;
     }
     
@@ -242,8 +243,8 @@ public class DataBase {
     public final int getPipelineIndex() {
         return index;
     }
-    
-    public final void setPipelineIndex(int value) {
-        index = value;
-    }
+
+//    public final void setPipelineIndex(int value) {
+//        index = value;
+//    }
 }
