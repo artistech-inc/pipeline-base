@@ -1,0 +1,139 @@
+span#per {
+  color: firebrick;
+  font-weight: bold;
+}
+span#perwrel {
+  color: firebrick;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#pertag {
+  color: firebrick;
+  font-size: 70%;
+}
+
+span#org {
+  color: darkslateblue;
+  font-weight: bold;
+}
+span#orgwrel {
+  color: darkslateblue;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#orgtag {
+  color: darkslateblue;
+  font-size: 70%;
+}
+
+span#gpe {
+  color: darkgreen;
+  font-weight: bold;
+}
+span#gpewrel {
+  color: darkgreen;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#gpetag {
+  color: dark green;
+  font-size: 70%;
+}
+
+span#fac {
+  color: aqua;
+  font-weight: bold;
+}
+span#facwrel {
+  color: aqua;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#factag {
+  color: aqua;
+  font-size: 70%;
+}
+
+span#loc {
+  color: aqua;
+  font-weight: bold;
+}
+span#locwrel {
+  color: aqua;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#loctag {
+  color: aqua;
+  font-size: 70%;
+}
+
+span#other {
+  color: magenta;
+  font-weight: bold;
+}
+span#otherwrel {
+  color: magenta;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#othertag {
+  color: magenta;
+  font-size: 70%;
+}
+
+span#veh {
+  color: saddlebrown;
+  font-weight: bold;
+}
+span#vehwrel {
+  color: saddlebrown;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#vehtag {
+  color: saddlebrown;
+  font-size: 70%;
+}
+
+span#wea {
+  color: springgreen;
+  font-weight: bold;
+}
+span#weawrel {
+  color: springgreen;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#weatag {
+  color: springgreen;
+  font-size: 70%;
+}
+
+span#timex {
+  color: forestgreen;
+  font-weight: bold;
+}
+span#timexwrel {
+  color: forestgreen;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#timextag {
+  color: forestgreen;
+  font-size: 70%;
+}
+
+span#value {
+  color: blue;
+  font-weight: bold;
+}
+span#valuewrel {
+  color: blue;
+  font-weight: bold;
+  text-decoration: underline;
+}
+span#valuetag {
+  color: blue;
+  font-size: 70%;
+}
