@@ -4,8 +4,12 @@
 package com.artistech.ee.beans;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Used in tomcat and jetty.
@@ -32,6 +36,19 @@ public class DataManager {
         return dataPath;
     }
 
+    public static DataBase newDataInstance(String key) {
+        DataBase ret = null;
+        try {
+            Class<?> c = Class.forName(PipelineBean.INSTANCE.getDataBeanType());
+            Constructor<?> constructor = c.getConstructor(String.class);
+            ret = (DataBase) constructor.newInstance(key);
+            return ret;
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return ret;
+    }
+
     public synchronized String[] getStoredData() {
         ArrayList<DataBase> ret = new ArrayList<>(DATAS.values());
         ArrayList<String> stored = new ArrayList<>();
@@ -48,7 +65,7 @@ public class DataManager {
             }
         }
         for (String key : stored) {
-            DataBase d = new DataBase(key);
+            DataBase d = newDataInstance(key);
             d.setPipelineDir(getDataPath());
             ret.add(d);
             DATAS.put(key, d);

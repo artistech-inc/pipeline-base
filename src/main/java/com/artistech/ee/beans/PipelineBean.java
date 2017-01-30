@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,19 +28,25 @@ public class PipelineBean {
 
     private Map map;
     private final Map<String, Part> parts;
-//    private final ArrayList<Part> path;
     private int index;
+    
+    public static final PipelineBean INSTANCE;
+    
+    static {
+        INSTANCE = new PipelineBean();
+    }
 
-    public class Part {
+    public class Part implements Comparable<Part> {
 
         private final boolean mutiRun;
-//        private final Map partMap;
         private final String name;
         private final Map<String, Parameter> params;
         private final String page;
         private final String[] requires;
+        private String outputDir;
 
         public Part(Part copy) {
+            this.outputDir = copy.outputDir;
             this.name = copy.name;
             this.mutiRun = copy.mutiRun;
             this.page = copy.page;
@@ -51,12 +58,11 @@ public class PipelineBean {
         }
 
         public Part(String name, Map map) {
-//            partMap = map;
             this.name = name;
             params = new HashMap<>();
+            outputDir = map.get("output-dir").toString();
             page = map.get("page").toString();
             ArrayList paramsObj = (ArrayList) map.get("parameters");
-//            ArrayList<Parameter> ret = new ArrayList<>();
             mutiRun = map.containsKey("multi-run") ? Boolean.parseBoolean(map.get("multi-run").toString()) : false;
             for (Object param : paramsObj) {
                 Map m = (Map) ((Map) param).get("parameter");
@@ -65,6 +71,14 @@ public class PipelineBean {
             }
             ArrayList list = (ArrayList) map.get("requires");
             requires = (String[]) list.toArray(new String[]{});
+        }
+        
+        public String getOutputDir() {
+            return outputDir;
+        }
+        
+        public void setOutputDir(String value) {
+            outputDir = value;
         }
 
         public String[] getRequires() {
@@ -80,7 +94,9 @@ public class PipelineBean {
         }
 
         public Parameter[] getParameters() {
-            return params.values().toArray(new Parameter[]{});
+            ArrayList<Parameter> vals = new ArrayList<>(params.values());
+            Collections.sort(vals);
+            return vals.toArray(new Parameter[]{});
         }
 
         public Parameter getParameter(String name) {
@@ -90,9 +106,14 @@ public class PipelineBean {
         Part copy() {
             return new Part(this);
         }
+
+        @Override
+        public int compareTo(Part t) {
+            return this.name.compareTo(t.name);
+        }
     }
 
-    public class Parameter {
+    public class Parameter implements Comparable<Parameter> {
 
         private final String name;
         private String value;
@@ -142,11 +163,15 @@ public class PipelineBean {
         Parameter copy() {
             return new Parameter(this);
         }
+
+        @Override
+        public int compareTo(Parameter t) {
+            return this.name.compareTo(t.name);
+        }
     }
 
     public PipelineBean() {
         parts = new HashMap<>();
-//        path = new ArrayList<>();
         try {
             URL resource = Thread.currentThread().getContextClassLoader().getResource("pipeline.yml");
             BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()));
@@ -173,6 +198,10 @@ public class PipelineBean {
         return map.get("description").toString();
     }
 
+    public String getDataBeanType() {
+        return map.get("data-object").toString();
+    }
+
     public int getIndex() {
         return index;
     }
@@ -181,16 +210,13 @@ public class PipelineBean {
         this.index = value;
     }
 
-//    public Part[] getPath() {
-//        return path.toArray(new Part[]{});
-//    }
-
     public Part[] getParts() {
-        return parts.values().toArray(new Part[]{});
+        ArrayList<Part> vals = new ArrayList<>(parts.values());
+        Collections.sort(vals);
+        return vals.toArray(new Part[]{});
     }
 
     public Part[] getPartsAfter(ArrayList<String> done) {
-//        List<String> done = Arrays.asList(after);
         ArrayList<Part> ret = new ArrayList<>();
         for (Part p : parts.values()) {
             List<String> reqs = Arrays.asList(p.getRequires());
@@ -201,6 +227,7 @@ public class PipelineBean {
                 }
             }
         }
+        Collections.sort(ret);
         return ret.toArray(new Part[]{});
     }
 
@@ -223,25 +250,4 @@ public class PipelineBean {
         return parts.get(name).copy();
     }
 
-//    public boolean addPart(Part p) {
-//        this.path.add(p);
-//        return true;
-//    }
-
-//    public ArrayList<String> getCurrentPath() {
-//        ArrayList<String> ret = new ArrayList<>();
-//        for (Part p : this.path) {
-//            ret.add(p.name);
-//        }
-//        return ret;
-//    }
-//
-//    public static void main(String[] args) {
-//        PipelineBean pb = new PipelineBean();
-//        System.out.println(pb.map.get("name"));
-//        Part[] partsAfter = pb.getPartsAfter(new String[]{"input"});
-//        for (Part p : partsAfter) {
-//            System.out.println(p.getName());
-//        }
-//    }
 }
