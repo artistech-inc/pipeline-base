@@ -1,7 +1,7 @@
 /*
  * Copyright 2017 ArtisTech, Inc.
  */
-package com.artistech.ee.green;
+package com.artistech.ee.web;
 
 //import com.artistech.ee.beans.Data;
 import com.artistech.ee.beans.DataBase;
@@ -113,8 +113,7 @@ public class PathBuild extends HttpServlet {
                 if (p.getType().equals("file")) {
                     // be sure there is a file that was uploaded.
                     if ("".equals(part.getSubmittedFileName().trim())) {
-                        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-                                request, response);
+                        MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
                         return;
                     }
                     p.setValue(part.getSubmittedFileName());
@@ -122,15 +121,6 @@ public class PathBuild extends HttpServlet {
                     File dir = new File(data.getInput());
                     if (!dir.exists()) {
                         dir.mkdirs();
-                    }
-
-                    String submittedFileName = part.getSubmittedFileName();
-                    if ("".equals(submittedFileName)) {
-                        // displays done.jsp page after upload finished
-//                        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-//                                request, response);
-                        MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
-                        return;
                     }
 
                     File f = new File(data.getInput() + File.separator + part.getSubmittedFileName());
@@ -146,8 +136,6 @@ public class PathBuild extends HttpServlet {
         data.addPart(create);
 
         MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
-//        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-//                request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
