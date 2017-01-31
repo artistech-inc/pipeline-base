@@ -1,12 +1,13 @@
 /*
  * Copyright 2017 ArtisTech, Inc.
  */
-package com.artistech.ee.web;
+package com.artistech.ee.green;
 
 //import com.artistech.ee.beans.Data;
 import com.artistech.ee.beans.DataBase;
 import com.artistech.ee.beans.DataManager;
 import com.artistech.ee.beans.PipelineBean;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class PathBuild extends HttpServlet {
 
     private static final int MAX_MEMORY_SIZE = 1024 * 1024 * 2;
     private static final int MAX_REQUEST_SIZE = 1024 * 1024;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -125,8 +127,10 @@ public class PathBuild extends HttpServlet {
                     String submittedFileName = part.getSubmittedFileName();
                     if ("".equals(submittedFileName)) {
                         // displays done.jsp page after upload finished
-                        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-                                request, response);
+//                        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
+//                                request, response);
+                        MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+                        return;
                     }
 
                     File f = new File(data.getInput() + File.separator + part.getSubmittedFileName());
@@ -140,8 +144,10 @@ public class PathBuild extends HttpServlet {
             }
         }
         data.addPart(create);
-        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-                request, response);
+
+        MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+//        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
+//                request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
