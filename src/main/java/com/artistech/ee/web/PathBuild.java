@@ -95,9 +95,9 @@ public class PathBuild extends HttpServlet {
         String stepName = IOUtils.toString(part.getInputStream(), "UTF-8");
         PipelineBean pb = new PipelineBean();
         PipelineBean.Part create = pb.createPart(stepName);
-        
+
         Collection<Part> parts = request.getParts();
-        for(Part p : parts) {
+        for (Part p : parts) {
             Logger.getLogger(PathBuild.class.getName()).log(Level.WARNING, p.getName());
         }
 
@@ -116,25 +116,34 @@ public class PathBuild extends HttpServlet {
                  * Handle Uploading a File.
                  */
                 if (p.getType().equals("file")) {
-                    // be sure there is a file that was uploaded.
                     String submittedFileName = part.getSubmittedFileName();
                     if (submittedFileName == null || "".equals(submittedFileName.trim())) {
                         MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
                         return;
                     }
-                    p.setValue(submittedFileName);
+                    for (Part p1 : parts) {
+                        if (p1.getName().equals(part.getName())) {
+                            // be sure there is a file that was uploaded.
+                            submittedFileName = p1.getSubmittedFileName();
+                            if (submittedFileName == null || "".equals(submittedFileName.trim())) {
+                                MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+                                return;
+                            }
+                            p.setValue(submittedFileName);
 
-                    File dir = new File(data.getInput());
-                    if (!dir.exists()) {
-                        dir.mkdirs();
-                    }
+                            File dir = new File(data.getInput());
+                            if (!dir.exists()) {
+                                dir.mkdirs();
+                            }
 
-                    File f = new File(data.getInput() + File.separator + submittedFileName);
-                    if (f.exists()) {
-                        f.delete();
-                    }
-                    try (FileOutputStream fos = new FileOutputStream(f)) {
-                        IOUtils.copy(part.getInputStream(), fos, 1024);
+                            File f = new File(data.getInput() + File.separator + submittedFileName);
+                            if (f.exists()) {
+                                f.delete();
+                            }
+                            try (FileOutputStream fos = new FileOutputStream(f)) {
+                                IOUtils.copy(p1.getInputStream(), fos, 1024);
+                            }
+                        }
                     }
                 }
             } else {

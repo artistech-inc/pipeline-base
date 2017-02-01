@@ -18,8 +18,8 @@
             }
         </style>
         <!-- esprima required only for !!js/function -->
-        <script src="js/esprima.js"></script>
-        <script src="js/js-yaml.min.js"></script>
+        <script type="text/javascript" src="js/esprima.js"></script>
+        <script type="text/javascript" src="js/js-yaml.min.js"></script>
         <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
         <script type="text/javascript">
             var yaml_config;
@@ -68,8 +68,13 @@
                 var oFormElement = document.getElementById(id);
                 var formData = new FormData(oFormElement);
 
-                for (var ii = 0; ii < files.length; ii++) {
-                    formData.append(files[ii], $('#' + files[ii])[0].files[0]);
+                if (files.length > 0) {
+                    for (var ii = 0; ii < files.length; ii++) {
+                        var fs = $('#' + files[ii]);
+                        for (var jj = 0; jj < fs[0].files.length; jj++) {
+                            formData.append(files[ii], $('#' + files[ii])[0].files[jj]);
+                        }
+                    }
                 }
 
                 $.ajax({
@@ -117,7 +122,6 @@
 
                     var parameters = current_parts[ii]["parameters"];
                     var ul = document.createElement('ul');
-                    console.log("parameters.length === " + parameters.length);
                     if (parameters.length > 0) {
                         for (var jj = 0; jj < parameters.length; jj++) {
                             var param = parameters[jj];
@@ -160,7 +164,7 @@
                     step_div.style = 'display: none; border-width: 0; border-style : solid; border-color : black';
                     step_div.id = parts_keys[ii] + '__div';
                     //<form method="POST" action="PathBuild" enctype="multipart/form-data" id="${step.name}__form">
-                    var form = document.createElement("form");
+                    var form = document.createElement('form');
                     form.action = 'PathBuild';
                     form.method = 'POST';
                     form.enctype = 'multipart/form-data';
@@ -289,6 +293,7 @@
                 var file = document.createElement('input');
                 file.id = id;
                 file.type = 'file';
+                file.multiple = 'multiple';
                 return file;
             }
         </script>
