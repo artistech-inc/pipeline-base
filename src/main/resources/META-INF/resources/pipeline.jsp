@@ -196,7 +196,7 @@
                                 label.innerHTML = param["name"];
                                 var name = parts_keys[ii] + '__' + param["name"];
                                 label.for = name;
-                                var f = buildSelect(name, ['a', 'b', 'c'], 'b');
+                                var f = buildSelect(name, param["values"], param["value"]);
                                 div3.appendChild(label);
                                 div3.appendChild(f);
                             }
