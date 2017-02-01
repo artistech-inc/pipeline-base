@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -92,13 +95,15 @@ public class PathBuild extends HttpServlet {
         String stepName = IOUtils.toString(part.getInputStream(), "UTF-8");
         PipelineBean pb = new PipelineBean();
         PipelineBean.Part create = pb.createPart(stepName);
+        
+        Collection<Part> parts = request.getParts();
+        for(Part p : parts) {
+            Logger.getLogger(PathBuild.class.getName()).log(Level.WARNING, p.getName());
+        }
 
         for (PipelineBean.Parameter p : create.getParameters()) {
             part = request.getPart(stepName + "__" + p.getName());
             if (part != null) {
-                //HANDLE THE INPUT!
-                System.out.println(p.getName());
-
                 /**
                  * Handle an enumerated (dropdown/select).
                  */
@@ -112,18 +117,19 @@ public class PathBuild extends HttpServlet {
                  */
                 if (p.getType().equals("file")) {
                     // be sure there is a file that was uploaded.
-                    if ("".equals(part.getSubmittedFileName().trim())) {
+                    String submittedFileName = part.getSubmittedFileName();
+                    if (submittedFileName == null || "".equals(submittedFileName.trim())) {
                         MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
                         return;
                     }
-                    p.setValue(part.getSubmittedFileName());
+                    p.setValue(submittedFileName);
 
                     File dir = new File(data.getInput());
                     if (!dir.exists()) {
                         dir.mkdirs();
                     }
 
-                    File f = new File(data.getInput() + File.separator + part.getSubmittedFileName());
+                    File f = new File(data.getInput() + File.separator + submittedFileName);
                     if (f.exists()) {
                         f.delete();
                     }
@@ -131,6 +137,9 @@ public class PathBuild extends HttpServlet {
                         IOUtils.copy(part.getInputStream(), fos, 1024);
                     }
                 }
+            } else {
+                MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+                return;
             }
         }
         data.addPart(create);
