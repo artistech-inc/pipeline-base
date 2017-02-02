@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 /**
+ * View an output file. Determine output mime-type from extension.
  *
  * @author matta
  */
@@ -90,7 +91,7 @@ public class ViewRaw extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "View output file";
     }// </editor-fold>
 
 }

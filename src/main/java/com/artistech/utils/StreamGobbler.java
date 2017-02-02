@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Wrapper for accessing the output stream of a process.
  *
  * @author matta
  */
@@ -20,11 +21,19 @@ public class StreamGobbler extends Thread {
     private final Mailbox<String> mailbox;
     private final InputStream is;
 
+    /**
+     * Constructor.
+     *
+     * @param is
+     */
     public StreamGobbler(InputStream is) {
         mailbox = new Mailbox<>();
         this.is = is;
     }
 
+    /**
+     * Threaded gobbler.
+     */
     @Override
     public void run() {
         Logger logger = Logger.getLogger(StreamGobbler.class.getName());
@@ -42,6 +51,11 @@ public class StreamGobbler extends Thread {
         }
     }
 
+    /**
+     * Get the latest text.
+     *
+     * @return
+     */
     public String getUpdateText() {
         ArrayList<String> messages = mailbox.getMessages();
         StringBuilder sb = new StringBuilder();

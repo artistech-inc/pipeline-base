@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 /**
+ * View an output file in HTML.
  *
  * @author matta
  */
@@ -40,15 +41,6 @@ public class View extends HttpServlet {
         String fileName = data.getPipelineDir() + File.separator + from + File.separator + file;
         File f = new File(fileName);
 
-//        if (!f.exists()) {
-//            for (String dir : Data.getDataKeys()) {
-//                fileName = data.getPipelineDir() + File.separator + dir + File.separator + file;
-//                f = new File(fileName);
-//                if(f.exists()) {
-//                    break;
-//                }
-//            }
-//        }
         response.setContentType("text/html;charset=UTF-8");
         IOUtils.copy(new FileInputStream(f), response.getWriter(), "UTF-8");
     }
@@ -89,7 +81,7 @@ public class View extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "View an output file in HTML";
     }// </editor-fold>
 
 }

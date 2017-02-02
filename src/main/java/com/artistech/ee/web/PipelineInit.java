@@ -8,12 +8,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
 /**
+ * Set the data_path value globally.
  *
  * @author matta
  */
+@WebListener
 public class PipelineInit implements ServletContextListener {
+
     private static final Logger LOGGER = Logger.getLogger(PipelineInit.class.getName());
 
     /**
@@ -27,6 +31,7 @@ public class PipelineInit implements ServletContextListener {
         String initParameter = sce.getServletContext().getInitParameter("data_path");
         DataManager.setDataPath(initParameter);
     }
+
     /**
      * Destroyed Event.
      *
@@ -36,5 +41,5 @@ public class PipelineInit implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.log(Level.FINER, "Context Destroyed!");
     }
-    
+
 }

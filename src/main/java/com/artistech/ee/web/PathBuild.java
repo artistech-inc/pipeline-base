@@ -25,6 +25,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 
 /**
+ * Add a new step in the process path.
  *
  * @author matta
  */
@@ -118,7 +119,7 @@ public class PathBuild extends HttpServlet {
                 if (p.getType().equals("file")) {
                     String submittedFileName = part.getSubmittedFileName();
                     if (submittedFileName == null || "".equals(submittedFileName.trim())) {
-                        MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+                        MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
                         return;
                     }
                     for (Part p1 : parts) {
@@ -126,7 +127,7 @@ public class PathBuild extends HttpServlet {
                             // be sure there is a file that was uploaded.
                             submittedFileName = p1.getSubmittedFileName();
                             if (submittedFileName == null || "".equals(submittedFileName.trim())) {
-                                MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+                                MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
                                 return;
                             }
                             p.setValue(submittedFileName);
@@ -147,13 +148,13 @@ public class PathBuild extends HttpServlet {
                     }
                 }
             } else {
-                MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+                MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
                 return;
             }
         }
         data.addPart(create);
 
-        MAPPER.writeValue(response.getOutputStream(), data.getCurrentParts());
+        MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -192,7 +193,7 @@ public class PathBuild extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Add a new step in the process path.";
     }// </editor-fold>
 
 }

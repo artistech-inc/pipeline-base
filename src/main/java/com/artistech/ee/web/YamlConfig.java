@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 /**
+ * Get the YAML config file.
  *
  * @author matta
  */
@@ -77,7 +78,7 @@ public class YamlConfig extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Get the YAML config file.";
     }// </editor-fold>
 
 }
