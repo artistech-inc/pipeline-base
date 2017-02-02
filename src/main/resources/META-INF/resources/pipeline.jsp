@@ -74,19 +74,10 @@
                         formData.append(input[0].id, input[0].value);
                     } else {
                         for (var jj = 0; jj < input[0].files.length; jj++) {
-                            formData.append(input[0].id, $('#' + input[0].id)[0].files[jj]);
+                            formData.append(input[0].id, input[0].files[jj]);
                         }
                     }
                 });
-
-//                if (files.length > 0) {
-//                    for (var ii = 0; ii < files.length; ii++) {
-//                        var fs = $('#' + files[ii]);
-//                        for (var jj = 0; jj < fs[0].files.length; jj++) {
-//                            formData.append(files[ii], $('#' + files[ii])[0].files[jj]);
-//                        }
-//                    }
-//                }
 
                 $.ajax({
                     url: 'PathBuild',
@@ -111,148 +102,103 @@
                 //use current_parts and yaml_config to do something...
                 //build HTML/forms dynamically
                 console.log("update_display()");
-                var configured_tag = document.getElementById('configured_div');
-                while (configured_tag.firstChild) {
-                    configured_tag.removeChild(configured_tag.firstChild);
-                }
+                var configured_tag = $("#configured_div");
+                configured_tag.empty();
 
                 /**
                  * build the current path....
                  */
-                for (var ii = 0; ii < current_parts.length; ii++) {
-                    var div = document.createElement('div');
-                    var fs = document.createElement('fieldset');
-                    var leg = document.createElement('legend');
-                    leg.innerHTML = current_parts[ii]["name"];
-                    fs.className = 'fieldset-auto-width';
-                    div.appendChild(fs);
-                    fs.appendChild(leg);
-                    configured_tag.append(fs);
-                    var br = document.createElement('br');
-                    configured_tag.append(br);
+                current_parts.forEach(function (part) {
+                    var fs = $('<fieldset></fieldset>').addClass("fieldset-auto-width");
+                    var leg = $('<legend>' + part["name"] + '</legend>');
+                    leg.appendTo(fs);
+                    fs.appendTo(configured_tag);
 
-                    var parameters = current_parts[ii]["parameters"];
-                    var ul = document.createElement('ul');
+                    $('<br>').appendTo(configured_tag);
+                    var parameters = part["parameters"];
+                    var ul = $('<ul></ul>');
                     if (parameters.length > 0) {
-                        for (var jj = 0; jj < parameters.length; jj++) {
-                            var param = parameters[jj];
-                            var li = document.createElement('li');
-                            li.innerHTML = param["name"] + ': ' + param["value"];
-                            ul.appendChild(li);
-                        }
+                        parameters.forEach(function (param) {
+                            $('<li>' + param["name"] + ': ' + param["value"] + '</li>').appendTo(ul);
+                        });
                     } else {
-                        var li = document.createElement('li');
-                        li.innerHTML = 'No Parameters';
-                        ul.appendChild(li);
+                        $('<li>No Parameters</li>').appendTo(ul);
                     }
-                    fs.appendChild(ul);
-                }
+                    ul.appendTo(fs);
+                });
 
                 /**
                  * Build the parameter forms.
                  */
-                //need equivalend of getPartsAfter(specified) in javascript.
-                var parent_tag = document.getElementById('part_config_div');
-                while (parent_tag.firstChild) {
-                    parent_tag.removeChild(parent_tag.firstChild);
-                }
-                var select = document.createElement('select');
-                select.id = 'step';
-                select.onchange = onStepChange;
+                var parent_tag = $('#part_config_div');
+                parent_tag.empty();
+                var select = $('<select id="step" onchange="onStepChange();"></select>');
                 var specified = [];
-                for (var ii = 0; ii < current_parts.length; ii++) {
-                    specified.push(current_parts[ii].name);
-                }
-                parent_tag.appendChild(select);
+                current_parts.forEach(function (part) {
+                    specified.push(part.name);
+                });
+                select.appendTo(parent_tag);
 
-                var parent_tag2 = document.getElementById('part_config_div2');
+                var parent_tag2 = $('#part_config_div2');
+                parent_tag2.empty();
+
                 var parts_keys = Object.keys(yaml_config["parts"]);
                 var files = [];
-                for (var ii = 0; ii < parts_keys.length; ii++) {
-                    //select.options[select.options.length] = new Option(parts_keys[ii], parts_keys[ii]);
-                    //<div id='${step.name}__div' style='display: none; border-width: 0; border-style : solid; border-color : black'>
-                    var step_div = document.createElement('div');
-                    step_div.style = 'display: none; border-width: 0; border-style : solid; border-color : black';
-                    step_div.id = parts_keys[ii] + '__div';
-                    //<form method="POST" action="PathBuild" enctype="multipart/form-data" id="${step.name}__form">
-                    var form = document.createElement('form');
-                    form.action = 'PathBuild';
-                    form.method = 'POST';
-                    form.enctype = 'multipart/form-data';
-                    form.id = parts_keys[ii] + "__form";
-                    var parameters = yaml_config["parts"][parts_keys[ii]]["parameters"];
-
+                parts_keys.forEach(function (elem) {
+                    var step_div = $('<div id="' + elem + '__div" style="display: none; border-width: 0; border-style : solid; border-color : black"></div>');
+                    var form = $('<form id="' + elem + '__form" action="PathBuild" method="POST" enctype="multipart/form-data"></form>');
+                    var parameters = yaml_config["parts"][elem]["parameters"];
 
                     if (parameters.length > 0) {
-                        var ff2 = document.createElement('fieldset');
-                        ff2.className = 'fieldset-auto-width';
-                        var leg2 = document.createElement('legend');
-                        leg2.innerHTML = parts_keys[ii];
-                        form.appendChild(ff2);
-                        ff2.appendChild(leg2);
+                        var ff2 = $('<fieldset></fieldset>').addClass("fieldset-auto-width");
+                        var leg2 = $('<legend>' + elem + '</legend>');
+                        leg2.appendTo(ff2);
+                        ff2.appendTo(form);
 
-                        for (var jj = 0; jj < parameters.length; jj++) {
-                            //<div id='step.name}__$parameter.name}__div" />' style='border-width: 0; border-style : solid; border-color : black'>
-                            var div3 = document.createElement('div');
-                            div3.style = 'border-width: 0; border-style : solid; border-color : black';
-                            ff2.appendChild(div3);
-                            var param = parameters[jj]["parameter"];
+                        parameters.forEach(function (p) {
+                            var div3 = $('<div style="border-width: 0; border-style : solid; border-color : black"></div>');
+                            div3.appendTo(ff2);
+                            var param = p["parameter"];
                             if (param["type"] === 'file') {
-                                var label = document.createElement('label');
-                                label.innerHTML = param["name"];
-                                var name = parts_keys[ii] + '__' + param["name"];
+                                var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                var name = elem + '__' + param["name"];
                                 files.push(name);
-                                label.for = name;
                                 var f = buildFile(name);
-                                div3.appendChild(label);
-                                div3.appendChild(f);
+                                label.appendTo(div3);
+                                f.appendTo(div3);
                             } else if (param["type"] === 'select') {
-                                var label = document.createElement('label');
-                                label.innerHTML = param["name"];
-                                var name = parts_keys[ii] + '__' + param["name"];
-                                label.for = name;
+                                var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                var name = elem + '__' + param["name"];
                                 var f = buildSelect(name, param["values"], param["value"]);
-                                div3.appendChild(label);
-                                div3.appendChild(f);
+                                label.appendTo(div3);
+                                f.appendTo(div3);
                             } else if (param["type"] === 'hidden') {
-                                var name = parts_keys[ii] + '__' + param["name"];
+                                var name = elem + '__' + param["name"];
                                 var f = buildHidden(name, param["value"]);
-                                div3.appendChild(f);
+                                f.appendTo(div3);
                             }
-                        }
+                        });
                     }
 
-                    form.appendChild(document.createElement('br'));
-                    var id_input = document.createElement('input');
-                    id_input.type = 'hidden';
-                    id_input.id = 'pipeline_id';
-                    id_input.name = 'pipeline_id';
-                    id_input.value = pipeline_id;
-                    var step_input = document.createElement('input');
-                    step_input.type = 'hidden';
-                    step_input.id = 'step_name';
-                    step_input.name = 'step_name';
-                    step_input.value = parts_keys[ii];
-                    var submit_input = document.createElement('input');
-                    submit_input.type = 'button';
-                    submit_input.value = 'Add Step';
+                    form.append($('<br>'));
+                    var id_input = buildHidden('pipeline_id', pipeline_id);
+                    var step_input = buildHidden('step_name', elem);
+                    var submit_input = $('<input type="button" value="Add Step" onclick="addStep(\'' + elem + '__form\');"></input>');
 
-                    var value = parts_keys[ii] + "__form";
-                    submit_input.onclick = onclickGenerator(value);
-                    form.appendChild(id_input);
-                    form.appendChild(step_input);
-                    form.appendChild(submit_input);
-                    parent_tag2.appendChild(step_div);
-                    step_div.appendChild(form);
-                }
+                    form.append(id_input);
+                    form.append(step_input);
+                    form.append(submit_input);
+                    step_div.appendTo(parent_tag2);
+                    form.appendTo(step_div);
+                });
 
                 /**
                  * Remove any parts that are currently unable to be performed
                  * due to un-met requirements.
                  */
                 var can_do = [];
-                for (var ii = 0; ii < parts_keys.length; ii++) {
-                    var part = yaml_config["parts"][parts_keys[ii]];
+                parts_keys.forEach(function (elem) {
+                    var part = yaml_config["parts"][elem];
                     var requires = part["requires"];
                     var sub = requires.diff(specified);
                     if (sub.length === 0) {
@@ -260,24 +206,24 @@
                         if (typeof multi === 'undefined') {
                             multi = false;
                         }
-                        if (multi || $.inArray(parts_keys[ii], specified) < 0) {
-                            can_do.push(parts_keys[ii]);
+                        if (multi || $.inArray(elem, specified) < 0) {
+                            can_do.push(elem);
                         }
                     }
-                }
+                });
                 /**
                  * Show only those parts with satisfied requirements.
                  */
-                for (var ii = 0; ii < can_do.length; ii++) {
-                    select.options[select.options.length] = new Option(can_do[ii], can_do[ii]);
-                }
+                can_do.forEach(function (elem) {
+                    $('<option value="' + elem + '">' + elem + '</option>').appendTo(select);
+                });
 
                 /**
                  * Display the run form.
                  */
                 if (current_parts.length > 1) {
-                    $("#run_pipeline_div").show();
-                    document.getElementById('run').action = current_parts[1]["page"];
+                    $('#run_pipeline_div').show();
+                    $('#run').attr('action', current_parts[1]["page"]);
                 }
 
                 /**
@@ -286,38 +232,25 @@
                 onStepChange();
             }
 
-            function onclickGenerator(id) {
-                return function () {
-                    addStep(id);
-                };
-            }
-
             function buildSelect(id, values, value) {
-                var select = document.createElement('select');
+                var select = $('<select id="' + id + '" name="' + id + '"></select>');
                 select.id = id;
-                for (var ii = 0; ii < values.length; ii++) {
-                    select.options[select.options.length] = new Option(values[ii], values[ii]);
-                    if (values[ii] === value) {
-                        select.options[select.options.length - 1].selected = true;
+                values.forEach(function (val) {
+                    var option = $('<option value="' + val + '">' + val + '</option>');
+                    if (val === value) {
+                        option.select();
                     }
-                }
+                    select.append(option);
+                });
                 return select;
             }
 
             function buildHidden(id, value) {
-                var hidden = document.createElement('input');
-                hidden.id = id;
-                hidden.type = 'hidden';
-                hidden.value = value;
-                return hidden;
+                return $('<input id="' + id + '" name="' + id + '" type="hidden" value="' + value + '"></input>');
             }
 
             function buildFile(id) {
-                var file = document.createElement('input');
-                file.id = id;
-                file.type = 'file';
-                file.multiple = 'multiple';
-                return file;
+                return $('<input id="' + id + '" name="' + id + '" type="file" multiple="multiple"></input>');
             }
         </script>
     </head>
