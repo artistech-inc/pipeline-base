@@ -10,6 +10,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel='stylesheet' href='style.css' type='text/css'>
+        <link rel='stylesheet' href='dropzone.css' type='text/css'>
         <title>${pipelineBean.name}</title>
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <style type="text/css">
@@ -21,10 +22,12 @@
         <script type="text/javascript" src="js/esprima.js"></script>
         <script type="text/javascript" src="js/js-yaml.min.js"></script>
         <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="js/dropzone.js"></script>
         <script type="text/javascript">
             var yaml_config;
             var current_parts = [];
             var pipeline_id = '${param.pipeline_id}';
+            var use_dropzone = true;
 
             Array.prototype.diff = function (a) {
                 return this.filter(function (i) {
@@ -160,12 +163,30 @@
                             var param = p["parameter"];
                             switch (param["type"]) {
                                 case 'file':
-                                    var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
-                                    var name = elem + '__' + param["name"];
-                                    files.push(name);
-                                    var f = buildFile(name);
-                                    label.appendTo(div3);
-                                    f.appendTo(div3);
+                                    if (use_dropzone) {
+                                        $("<div class='dropzone'></div>").dropzone({
+                                            paramName: elem + "__" + param["name"],
+                                            url: "PathBuild",
+                                            uploadMultiple: true,
+                                            init: function () {
+                                                this.on("sending", function (file, xhr, formData) {
+                                                    formData.append("pipeline_id", pipeline_id);
+                                                    formData.append("step_name", elem);
+
+                                                    xhr.addEventListener("load", function (evt) {
+                                                        submit_callback(xhr.responseText);
+                                                    });
+                                                });
+                                            }
+                                        }).appendTo(div3);
+                                    } else {
+                                        var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                        var name = elem + '__' + param["name"];
+                                        files.push(name);
+                                        var f = buildFile(name);
+                                        label.appendTo(div3);
+                                        f.appendTo(div3);
+                                    }
                                     break;
                                 case 'select':
                                     var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
@@ -236,7 +257,7 @@
                 can_do.forEach(function (elem) {
                     $('<option value="' + elem + '">' + elem + '</option>').appendTo(select);
                 });
-                if(can_do.length > 0) {
+                if (can_do.length > 0) {
                     select.appendTo(parent_tag);
                 }
 

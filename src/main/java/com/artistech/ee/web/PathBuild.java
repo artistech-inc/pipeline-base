@@ -102,8 +102,19 @@ public class PathBuild extends HttpServlet {
             Logger.getLogger(PathBuild.class.getName()).log(Level.WARNING, p.getName());
         }
 
+        int counter = 0;
         for (PipelineBean.Parameter p : create.getParameters()) {
             part = request.getPart(stepName + "__" + p.getName());
+            //hack if using dropzone:
+            if (part == null) {
+                String name = stepName + "__" + p.getName() + "[" + Integer.toString(counter) + "]";
+                part = request.getPart(name);
+                if(part != null) {
+                    counter += 1;
+                } else {
+                    counter = 0;
+                }
+            }
             if (part != null) {
                 /**
                  * Handle an enumerated (dropdown/select).
