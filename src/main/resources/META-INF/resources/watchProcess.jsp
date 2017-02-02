@@ -114,13 +114,13 @@
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     </head>
     <body onload="init();">
-        <h1>Watch Process: <c:out value="${dataBean.data.currentParts.get(dataBean.data.pipelineIndex-1).name}" /></h1>
+        <h1>Watch Process: <c:out value="${dataBean.data.pipelineParts.get(dataBean.data.pipelineIndex-1).name}" /></h1>
         <br />
         <textarea id="console" rows="50" cols="85"></textarea>
         <br />
         <c:set value="${fn:length(dataBean.data.currentPath)}" var="specifed" />
         <c:if test="${dataBean.data.pipelineIndex lt specifed}">
-            <form name="continue_form" id="confinue_form" method="POST" action="${dataBean.data.currentParts.get(dataBean.data.pipelineIndex).page}" enctype="multipart/form-data">
+            <form name="continue_form" id="confinue_form" method="POST" action="${dataBean.data.pipelineParts.get(dataBean.data.pipelineIndex).page}" enctype="multipart/form-data">
             </c:if>
             <c:if test="${dataBean.data.pipelineIndex eq specifed}">
                 <form name="continue_form" id="confinue_form" method="POST" action="hub.jsp">
