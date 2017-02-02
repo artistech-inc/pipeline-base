@@ -59,7 +59,7 @@
 
             function yaml_callback(data) {
                 yaml_config = jsyaml.load(data);
-                update_display();
+                update_display(pipeline_id);
             }
 
             function addStep(id)
@@ -94,10 +94,10 @@
 
             function submit_callback(data) {
                 current_parts = JSON.parse(data);
-                update_display();
+                update_display(pipeline_id);
             }
 
-            function update_display() {
+            function update_display(pipeline_id) {
                 //use current_parts and yaml_config to do something...
                 //build HTML/forms dynamically
                 console.log("update_display()");
@@ -136,7 +136,7 @@
                 current_parts.forEach(function (part) {
                     specified.push(part.name);
                 });
-                select.appendTo(parent_tag);
+//                select.appendTo(parent_tag);
 
                 var parent_tag2 = $('#part_config_div2');
                 parent_tag2.empty();
@@ -236,6 +236,9 @@
                 can_do.forEach(function (elem) {
                     $('<option value="' + elem + '">' + elem + '</option>').appendTo(select);
                 });
+                if(can_do.length > 0) {
+                    select.appendTo(parent_tag);
+                }
 
                 /**
                  * Display the run form.
