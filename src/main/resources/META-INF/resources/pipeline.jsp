@@ -62,20 +62,31 @@
                 update_display();
             }
 
-            function addStep(id, files)
+            function addStep(id)
             {
                 console.log("submitting: " + id);
                 var oFormElement = document.getElementById(id);
                 var formData = new FormData(oFormElement);
-
-                if (files.length > 0) {
-                    for (var ii = 0; ii < files.length; ii++) {
-                        var fs = $('#' + files[ii]);
-                        for (var jj = 0; jj < fs[0].files.length; jj++) {
-                            formData.append(files[ii], $('#' + files[ii])[0].files[jj]);
+                console.log(formData);
+                $("form#" + id + " :input").each(function () {
+                    var input = $(this);
+                    if (input[0].type !== 'file') {
+                        formData.append(input[0].id, input[0].value);
+                    } else {
+                        for (var jj = 0; jj < input[0].files.length; jj++) {
+                            formData.append(input[0].id, $('#' + input[0].id)[0].files[jj]);
                         }
                     }
-                }
+                });
+
+//                if (files.length > 0) {
+//                    for (var ii = 0; ii < files.length; ii++) {
+//                        var fs = $('#' + files[ii]);
+//                        for (var jj = 0; jj < fs[0].files.length; jj++) {
+//                            formData.append(files[ii], $('#' + files[ii])[0].files[jj]);
+//                        }
+//                    }
+//                }
 
                 $.ajax({
                     url: 'PathBuild',
@@ -223,7 +234,7 @@
                     submit_input.value = 'Add Step';
 
                     var value = parts_keys[ii] + "__form";
-                    submit_input.onclick = onclickGenerator(value, files);
+                    submit_input.onclick = onclickGenerator(value);
                     form.appendChild(id_input);
                     form.appendChild(step_input);
                     form.appendChild(submit_input);
@@ -271,9 +282,9 @@
                 onStepChange();
             }
 
-            function onclickGenerator(id, files) {
+            function onclickGenerator(id) {
                 return function () {
-                    addStep(id, files);
+                    addStep(id);
                 };
             }
 
