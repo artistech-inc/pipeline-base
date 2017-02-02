@@ -67,7 +67,6 @@
                 console.log("submitting: " + id);
                 var oFormElement = document.getElementById(id);
                 var formData = new FormData(oFormElement);
-                console.log(formData);
                 $("form#" + id + " :input").each(function () {
                     var input = $(this);
                     if (input[0].type !== 'file') {
@@ -159,23 +158,43 @@
                             var div3 = $('<div style="border-width: 0; border-style : solid; border-color : black"></div>');
                             div3.appendTo(ff2);
                             var param = p["parameter"];
-                            if (param["type"] === 'file') {
-                                var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
-                                var name = elem + '__' + param["name"];
-                                files.push(name);
-                                var f = buildFile(name);
-                                label.appendTo(div3);
-                                f.appendTo(div3);
-                            } else if (param["type"] === 'select') {
-                                var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
-                                var name = elem + '__' + param["name"];
-                                var f = buildSelect(name, param["values"], param["value"]);
-                                label.appendTo(div3);
-                                f.appendTo(div3);
-                            } else if (param["type"] === 'hidden') {
-                                var name = elem + '__' + param["name"];
-                                var f = buildHidden(name, param["value"]);
-                                f.appendTo(div3);
+                            switch (param["type"]) {
+                                case 'file':
+                                    var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    var name = elem + '__' + param["name"];
+                                    files.push(name);
+                                    var f = buildFile(name);
+                                    label.appendTo(div3);
+                                    f.appendTo(div3);
+                                    break;
+                                case 'select':
+                                    var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    var name = elem + '__' + param["name"];
+                                    var f = buildSelect(name, param["values"], param["value"]);
+                                    label.appendTo(div3);
+                                    f.appendTo(div3);
+                                    break;
+                                case 'number':
+                                    var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    var name = elem + '__' + param["name"];
+                                    var f = buildNumber(name, param["value"]);
+                                    label.appendTo(div3);
+                                    f.appendTo(div3);
+                                    break;
+                                case 'boolean':
+                                    var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    var name = elem + '__' + param["name"];
+                                    var f = buildBoolean(name, param["value"]);
+                                    label.appendTo(div3);
+                                    f.appendTo(div3);
+                                    break;
+                                case 'hidden':
+                                    var name = elem + '__' + param["name"];
+                                    var f = buildHidden(name, param["value"]);
+                                    f.appendTo(div3);
+                                    break;
+                                default:
+                                    console.log("unknown type: " + param["type"]);
                             }
                         });
                     }
@@ -247,6 +266,14 @@
 
             function buildHidden(id, value) {
                 return $('<input id="' + id + '" name="' + id + '" type="hidden" value="' + value + '"></input>');
+            }
+
+            function buildNumber(id, value) {
+                return $('<input id="' + id + '" name="' + id + '" type="number" value="' + value + '"></input>');
+            }
+
+            function buildBoolean(id, value) {
+                return $('<input id="' + id + '" name="' + id + '" type="checkbox" ' + (value ? "checked" : "") + '></input>');
             }
 
             function buildFile(id) {
