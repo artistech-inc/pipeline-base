@@ -214,6 +214,10 @@
                                 var f = buildSelect(name, param["values"], param["value"]);
                                 div3.appendChild(label);
                                 div3.appendChild(f);
+                            } else if (param["type"] === 'hidden') {
+                                var name = parts_keys[ii] + '__' + param["name"];
+                                var f = buildHidden(name, param["value"]);
+                                div3.appendChild(f);
                             }
                         }
                     }
@@ -298,6 +302,14 @@
                     }
                 }
                 return select;
+            }
+
+            function buildHidden(id, value) {
+                var hidden = document.createElement('input');
+                hidden.id = id;
+                hidden.type = 'hidden';
+                hidden.value = value;
+                return hidden;
             }
 
             function buildFile(id) {
