@@ -19,6 +19,8 @@
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     </head>
     <body>
+        <h1>Download</h1>
+        <a href="ZipDownload?pipeline_id=${dataBean.pipeline_id}">Download Zip</a>
         <h1>${pipelineBean.name}: Data</h1>
         <c:forEach var="dataDir" items="${dataBean.data.runKeys}">
             <c:if test="${fn:length(dataBean.data.getFiles(dataDir)) gt 0}">

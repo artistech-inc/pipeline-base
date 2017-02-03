@@ -26,6 +26,9 @@
     </head>
     <body>
         <c:if test="${not empty param.pipeline_id}">
+            <h1>Download</h1>
+            <a href="ZipDownload?pipeline_id=${param.pipeline_id}">Download Zip</a>
+
             <h1>View All Data</h1>
             <c:forEach var="dataDir" items="${dataBean.getData(param.pipeline_id).runKeys}">
                 <ul><kbd>${dataDir}</kbd> Files:
