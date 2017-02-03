@@ -265,7 +265,11 @@
                 /**
                  * Display the run form.
                  */
-                if (current_parts.length > 1) {
+                var can_run = false;
+                specified.forEach(function (elem) {
+                    can_run = can_run || elem !== 'input';
+                });
+                if (can_run) {
                     $('#run_pipeline_div').show();
                     $('#run').attr('action', current_parts[1]["page"]);
                 }

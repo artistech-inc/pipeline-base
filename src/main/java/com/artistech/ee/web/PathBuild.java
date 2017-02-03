@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.event.EventListenerSupport;
 
 /**
  * Add a new step in the process path.
@@ -102,75 +104,73 @@ public class PathBuild extends HttpServlet {
         param_part = request.getPart("step_name");
         String stepName = IOUtils.toString(param_part.getInputStream(), "UTF-8");
         PipelineBean pb = new PipelineBean();
-        PipelineBean.Part create = pb.createPart(stepName);
 
         Collection<Part> parts = request.getParts();
         for (Part p : parts) {
             Logger.getLogger(PathBuild.class.getName()).log(Level.WARNING, p.getName());
         }
 
-        int counter = 0;
         /**
          * Loop through all pairings. This is a hack due to allowing multiple
          * file uploads from dropzone.
          */
-        for (PipelineBean.Parameter p : create.getParameters()) {
-            for (Part part : parts) {
-                if (part.getName().startsWith(stepName + "__" + p.getName())) {
-                    counter += 1;
-                    /**
-                     * Handle an enumerated (dropdown/select).
-                     */
-                    if (p.getType().equals("select")) {
-                        String value = IOUtils.toString(part.getInputStream(), "UTF-8");
-                        p.setValue(value);
-                    }
-
-                    /**
-                     * Handle Uploading a File.
-                     */
-                    if (p.getType().equals("file")) {
-                        String submittedFileName = part.getSubmittedFileName();
-                        if (submittedFileName == null || "".equals(submittedFileName.trim())) {
-                            MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
-                            return;
+        int last_count = parts.size() + 1;
+        ArrayList<Part> toRemove = new ArrayList<>();
+        while (parts.size() != last_count) {
+            PipelineBean.Part create = pb.createPart(stepName);
+            last_count = parts.size();
+            for (PipelineBean.Parameter p : create.getParameters()) {
+                for (Part part : parts) {
+                    if (part.getName().startsWith(stepName + "__" + p.getName())) {
+                        toRemove.add(part);
+                        /**
+                         * Handle an enumerated (dropdown/select).
+                         */
+                        if (p.getType().equals("select")) {
+                            String value = IOUtils.toString(part.getInputStream(), "UTF-8");
+                            p.setValue(value);
                         }
-                        for (Part p1 : parts) {
-                            if (p1.getName().equals(part.getName())) {
-                                // be sure there is a file that was uploaded.
-                                submittedFileName = p1.getSubmittedFileName();
-                                if (submittedFileName == null || "".equals(submittedFileName.trim())) {
-                                    MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
-                                    return;
-                                }
-                                p.setValue(submittedFileName);
 
-                                File dir = new File(data.getInput());
-                                if (!dir.exists()) {
-                                    dir.mkdirs();
-                                }
-
-                                File f = new File(data.getInput() + File.separator + submittedFileName);
-                                if (f.exists()) {
-                                    f.delete();
-                                }
-                                try (FileOutputStream fos = new FileOutputStream(f)) {
-                                    IOUtils.copy(p1.getInputStream(), fos, 1024);
-                                }
+                        /**
+                         * Handle Uploading a File.
+                         */
+                        if (p.getType().equals("file")) {
+                            String submittedFileName = part.getSubmittedFileName();
+                            if (submittedFileName == null || "".equals(submittedFileName.trim())) {
+                                MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
+                                return;
                             }
+                            // be sure there is a file that was uploaded.
+                            submittedFileName = part.getSubmittedFileName();
+                            if (submittedFileName == null || "".equals(submittedFileName.trim())) {
+                                MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
+                                return;
+                            }
+                            p.setValue(submittedFileName);
+
+                            File dir = new File(data.getInput());
+                            if (!dir.exists()) {
+                                dir.mkdirs();
+                            }
+
+                            File f = new File(data.getInput() + File.separator + submittedFileName);
+                            if (f.exists()) {
+                                f.delete();
+                            }
+                            try (FileOutputStream fos = new FileOutputStream(f)) {
+                                IOUtils.copy(part.getInputStream(), fos, 1024);
+                            }
+                            break;
                         }
                     }
                 }
+                parts.removeAll(toRemove);
+            }
+            if (create.getParameters().length == 0 || !toRemove.isEmpty()) {
+                data.addPart(create);
+                toRemove.clear();
             }
         }
-        /**
-         * Check that some values were set.
-         */
-        if (counter < create.getParameters().length) {
-            MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
-            return;
-        }
-        data.addPart(create);
 
         writeConfig(data);
         MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
