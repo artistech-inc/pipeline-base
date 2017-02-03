@@ -164,6 +164,7 @@
                             switch (param["type"]) {
                                 case 'file':
                                     if (use_dropzone) {
+                                        $("<span>" + param["name"] + "</span>").appendTo(div3);
                                         $("<div class='dropzone'></div>").dropzone({
                                             paramName: elem + "__" + param["name"],
                                             url: "PathBuild",
