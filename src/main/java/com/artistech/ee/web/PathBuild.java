@@ -8,8 +8,11 @@ import com.artistech.ee.beans.DataBase;
 import com.artistech.ee.beans.DataManager;
 import com.artistech.ee.beans.PipelineBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -37,6 +40,10 @@ public class PathBuild extends HttpServlet {
     private static final int MAX_MEMORY_SIZE = 1024 * 1024 * 2;
     private static final int MAX_REQUEST_SIZE = 1024 * 1024;
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    static {
+        MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+    }
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -104,8 +111,8 @@ public class PathBuild extends HttpServlet {
 
         int counter = 0;
         /**
-         * Loop through all pairings.
-         * This is a hack due to allowing multiple file uploads from dropzone.
+         * Loop through all pairings. This is a hack due to allowing multiple
+         * file uploads from dropzone.
          */
         for (PipelineBean.Parameter p : create.getParameters()) {
             for (Part part : parts) {
@@ -165,7 +172,21 @@ public class PathBuild extends HttpServlet {
         }
         data.addPart(create);
 
+        writeConfig(data);
         MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
+    }
+
+    /**
+     * Write out the config.
+     *
+     * @param data
+     */
+    private void writeConfig(DataBase data) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(data.getConfigFile())))) {
+            MAPPER.writeValue(bw, data.getPipelineParts());
+        } catch (IOException ex) {
+            Logger.getLogger(PathBuild.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

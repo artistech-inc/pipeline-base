@@ -19,6 +19,8 @@ import java.util.logging.Logger;
  */
 public abstract class DataBase {
 
+    public static final String CONSOLE_LOG = "console.log";
+    public static final String CONIFG_JSON = "config.json";
     public static final String INPUT_DIR = "input";
 
     public String dataDir = "";
@@ -120,7 +122,13 @@ public abstract class DataBase {
     public final String[] getFiles(String key) {
         File f = new File(getData(key));
         if (f.exists() && f.isDirectory()) {
-            return f.list();
+            ArrayList<String> ret = new ArrayList<>();
+            for (File file : f.listFiles()) {
+                if (file.isFile()) {
+                    ret.add(file.getName());
+                }
+            }
+            return ret.toArray(new String[]{});
         }
         return new String[]{};
     }
@@ -142,6 +150,7 @@ public abstract class DataBase {
      */
     public String[] getRunKeys() {
         ArrayList<String> runPath = new ArrayList<>();
+        runPath.add("");
         for (PipelineBean.Part part : this.path) {
             runPath.add(part.getOutputDir());
         }
@@ -238,6 +247,24 @@ public abstract class DataBase {
      */
     public final int getPipelineIndex() {
         return index;
+    }
+
+    /**
+     * Get the file for the console log.
+     *
+     * @return
+     */
+    public String getConsoleFile() {
+        return getPipelineDir() + File.separator + CONSOLE_LOG;
+    }
+
+    /**
+     * Get the file for the config file.
+     *
+     * @return
+     */
+    public String getConfigFile() {
+        return getPipelineDir() + File.separator + CONIFG_JSON;
     }
 
 }

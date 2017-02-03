@@ -43,6 +43,8 @@ public class ViewRaw extends HttpServlet {
             response.setContentType("text/xml;charset=UTF-8");
         } else if (file.endsWith(".html")) {
             response.setContentType("text/html;charset=UTF-8");
+        } else if (file.endsWith(".json")) {
+            response.setContentType("text/json;charset=UTF-8");
         } else if (file.endsWith(".html")) {
             response.setContentType("text/plain;charset=UTF-8");
         }

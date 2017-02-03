@@ -19,7 +19,7 @@ public class StreamGobblerWrapper extends StreamGobbler {
      * @param wrapped
      */
     public StreamGobblerWrapper(StreamGobbler wrapped) {
-        super(null);
+        super(null, wrapped.os);
         this.wrapped = wrapped;
     }
 
@@ -28,6 +28,11 @@ public class StreamGobblerWrapper extends StreamGobbler {
      */
     @Override
     public void run() {
+    }
+
+    @Override
+    public void write(String line) {
+        wrapped.write(line);
     }
 
     /**
