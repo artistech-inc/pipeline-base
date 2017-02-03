@@ -40,7 +40,7 @@ public abstract class DataBase {
         this.key = key;
         last_use = Calendar.getInstance();
         path = new ArrayList<>();
-        index = 1; //assume that step 0 is input!!
+        index = 0; //assume that step 0 is input!!
     }
 
     /**
@@ -152,7 +152,10 @@ public abstract class DataBase {
         ArrayList<String> runPath = new ArrayList<>();
         runPath.add("");
         for (PipelineBean.Part part : this.path) {
-            runPath.add(part.getOutputDir());
+            String value = part.getOutputDir();
+            if (!runPath.contains(value)) {
+                runPath.add(value);
+            }
         }
         return runPath.toArray(new String[]{});
     }

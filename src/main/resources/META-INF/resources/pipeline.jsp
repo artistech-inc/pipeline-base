@@ -271,7 +271,7 @@
                 });
                 if (can_run) {
                     $('#run_pipeline_div').show();
-                    $('#run').attr('action', current_parts[1]["page"]);
+                    $('#run').attr('action', current_parts[0]["page"]);
                 }
 
                 /**
