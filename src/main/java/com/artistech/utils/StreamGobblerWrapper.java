@@ -19,7 +19,7 @@ public class StreamGobblerWrapper extends StreamGobbler {
      * @param wrapped
      */
     public StreamGobblerWrapper(StreamGobbler wrapped) {
-        super(null, wrapped.os);
+        super(null, wrapped == null ? null : wrapped.os);
         this.wrapped = wrapped;
     }
 
