@@ -40,15 +40,6 @@
                         </c:forEach>
                 </ul>
             </c:forEach>
-            <c:forEach var="dataDir" items="${dataBean.getData(param.pipeline_id).keys}">
-                <c:if test="${fn:length(dataBean.getData(param.pipeline_id).getFiles(dataDir)) gt 0}">
-                    <ul><kbd>${dataDir}</kbd> Files:
-                        <c:forEach var="dataFile" items="${dataBean.getData(param.pipeline_id).getFiles(dataDir)}">
-                            <li><a target="_blank" href="ViewRaw?stage=${dataDir}&pipeline_id=${param.pipeline_id}&file=${dataFile}">${dataFile}</a></li>
-                            </c:forEach>
-                    </ul>
-                </c:if>
-            </c:forEach>
         </c:if>
         <c:if test="${empty param.pipeline_id}">
             <h1>View All Data</h1>
