@@ -17,6 +17,9 @@
             .fieldset-auto-width {
                 display: inline-block;
             }
+            table.configured {
+                width: 400px;
+            }
         </style>
         <!-- esprima required only for !!js/function -->
         <script type="text/javascript" src="js/esprima.js"></script>
@@ -42,6 +45,8 @@
                     $('#' + parts_keys[ii] + '__div').hide();
                 }
                 $('#' + currStep + '__div').show();
+                $("table").find("tbody>tr:odd").css("background-color","#E5E4E2");
+                $("table").find("tbody>tr:even").css("background-color","#BCC6CC");
             }
 
             function init() {
@@ -108,24 +113,29 @@
             function update_configured_path() {
                 var configured_tag = $("#configured_div");
                 configured_tag.empty();
+                configured_tag.append($('<h2>Configured Path</h2>'));
 
                 current_parts.forEach(function (part) {
+                    var div = $('<div></div>');
                     var fs = $('<fieldset></fieldset>').addClass("fieldset-auto-width");
                     var leg = $('<legend>' + part["name"] + '</legend>');
                     leg.appendTo(fs);
-                    fs.appendTo(configured_tag);
+                    configured_tag.append(div);
 
-                    $('<br>').appendTo(configured_tag);
+                    var table = $('<table class="configured"></table>');
+                    $('<thead><th>Parameter</th><th>Value</th></thead>').appendTo(table);
+                    var body = $('<tbody></tbody>').appendTo(table);
+
                     var parameters = part["parameters"];
-                    var ul = $('<ul></ul>');
                     if (parameters.length > 0) {
                         parameters.forEach(function (param) {
-                            $('<li>' + param["name"] + ': ' + param["value"] + '</li>').appendTo(ul);
+                            $('<tr><td>' + param["name"] + '</td><td>' + param["value"] + '</td></tr>').appendTo(body);
                         });
                     } else {
-                        $('<li>No Parameters</li>').appendTo(ul);
+                        $('<tr><td>None</td><td>NA</td></tr>').appendTo(body);
                     }
-                    ul.appendTo(fs);
+                    div.append(fs);
+                    table.appendTo(fs);
                 });
             }
 
@@ -148,6 +158,9 @@
 
                 var parent_tag2 = $('#part_config_div2');
                 parent_tag2.empty();
+                parent_tag2.append($('<h2>Next Step</h2>'));
+                var place_hodler = $('<div></div>');
+                parent_tag2.append(place_hodler);
 
                 var parts_keys = Object.keys(yaml_config["parts"]);
                 var files = [];
@@ -266,10 +279,10 @@
                  * Show only those parts with satisfied requirements.
                  */
                 can_do.forEach(function (elem) {
-                    $('<option value="' + elem + '">' + elem + '</option>').appendTo(select);
+                    select.append($('<option value="' + elem + '">' + elem + '</option>'));
                 });
                 if (can_do.length > 0) {
-                    select.appendTo(parent_tag);
+                    place_hodler.append(select);
                 }
 
                 /**
@@ -323,7 +336,6 @@
     <body onload="init()">
         <h1>${pipelineBean.name}</h1>
         ${pipelineBean.description}
-        <h2>Configuration</h2>
         <div id="configured_div"></div>
         <div id="part_config_div"></div>
         <div id="part_config_div2"></div>

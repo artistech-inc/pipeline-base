@@ -54,7 +54,7 @@
             <h1>View All Data</h1>
             <c:if test="${fn:length(dataBean.storedData) gt 0}">
                 <table width="600px">
-                    <thead><tr><td><span class="table-header">Run Date</span</td><td><span class="table-header">Configuration</span></td></tr></thead>
+                    <thead><th><span class="table-header">Run Date</span</th><th><span class="table-header">Configuration</span></th></thead>
                     <tbody>
                         <c:forEach var="id" items="${dataBean.storedData}">
                             <tr><td width="175px">${id.date}</td><td><a href="viewAll.jsp?pipeline_id=${id.file.name}">${id.file.name}</a></td></tr>
