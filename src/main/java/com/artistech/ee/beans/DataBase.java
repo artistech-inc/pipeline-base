@@ -4,20 +4,16 @@
 package com.artistech.ee.beans;
 
 import com.artistech.utils.ExternalProcess;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Base class for each pipeline's bean.
@@ -29,14 +25,17 @@ public abstract class DataBase {
     public static final String CONSOLE_LOG = "console.log";
     public static final String CONIFG_JSON = "config.json";
     public static final String INPUT_DIR = "input";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public String dataDir = "";
+
     private final ArrayList<PipelineBean.Part> path;
     private int index;
 
     private Calendar last_use;
     private final String key;
     private ExternalProcess proc;
+
 
     /**
      * Constructor.
@@ -156,12 +155,26 @@ public abstract class DataBase {
      * @return
      */
     public String[] getRunKeys() {
+        File f = new File(getConfigFile());
         ArrayList<String> runPath = new ArrayList<>();
-        runPath.add("");
-        for (PipelineBean.Part part : this.path) {
-            String value = part.getOutputDir();
-            if (!runPath.contains(value)) {
-                runPath.add(value);
+        if (f.exists()) {
+            try {
+                ArrayList readTree = MAPPER.readValue(f, ArrayList.class);
+                for (Object o : readTree) {
+                    Map m = (Map) o;
+                    runPath.add(m.get("outputDir").toString());
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(DataBase.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            runPath.add("");
+            for (PipelineBean.Part part : this.path) {
+                String value = part.getOutputDir();
+                if (!runPath.contains(value)) {
+                    runPath.add(value);
+                }
             }
         }
         return runPath.toArray(new String[]{});
