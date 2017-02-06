@@ -23,6 +23,9 @@
         <script type="text/javascript" src="js/json2html.js"></script>
         <script type="text/javascript" src="js/jquery.json2html.js"></script>
         <script type="text/javascript" src="js/json-viz.js"></script>
+        <style>
+            span.table-header {font-size: larger};
+        </style>
     </head>
     <body>
         <c:if test="${not empty param.pipeline_id}">
@@ -50,16 +53,28 @@
         <c:if test="${empty param.pipeline_id}">
             <h1>View All Data</h1>
             <c:if test="${fn:length(dataBean.storedData) gt 0}">
-                <ul>Input Files:
-                    <c:forEach var="id" items="${dataBean.storedData}">
-                        <li><a href="viewAll.jsp?pipeline_id=${id.file.name}">${id.file.name}</a> (${id.date})
-                            <div id="${id.file.name}"></div>
-                            <script>
-                                visualize(${id.config}, "${id.file.name}");
-                            </script>
-                        </li>
-                    </c:forEach>
-                </ul>
+                <table width="600px">
+                    <thead><tr><td><span class="table-header">Run Date</span</td><td><span class="table-header">Configuration</span></td></tr></thead>
+                    <tbody>
+                        <c:forEach var="id" items="${dataBean.storedData}">
+                            <tr><td width="175px">${id.date}</td><td><a href="viewAll.jsp?pipeline_id=${id.file.name}">${id.file.name}</a></td></tr>
+                            <tr>
+                                <td width="175px"></td><td>
+                                    <div id="${id.file.name}"></div>
+                                    <script>
+                                    visualize(${id.config}, "${id.file.name}");
+                                    </script>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+                <script>
+                    $("tbody>tr:nth-child(4n + 3)").css("background", "#E5E4E2");
+                    $("tbody>tr:nth-child(4n + 4)").css("background", "#E5E4E2");
+                    $("tbody>tr:nth-child(4n + 1)").css("background", "#BCC6CC");
+                    $("tbody>tr:nth-child(4n + 2)").css("background", "#BCC6CC");
+                </script>
             </c:if>
         </c:if>
     </body>

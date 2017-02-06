@@ -100,16 +100,15 @@
                 update_display(pipeline_id);
             }
 
-            function update_display(pipeline_id) {
-                //use current_parts and yaml_config to do something...
-                //build HTML/forms dynamically
-                console.log("update_display()");
+            /**
+             * Build the current path.
+             * 
+             * @returns {undefined}
+             */
+            function update_configured_path() {
                 var configured_tag = $("#configured_div");
                 configured_tag.empty();
 
-                /**
-                 * build the current path....
-                 */
                 current_parts.forEach(function (part) {
                     var fs = $('<fieldset></fieldset>').addClass("fieldset-auto-width");
                     var leg = $('<legend>' + part["name"] + '</legend>');
@@ -128,6 +127,12 @@
                     }
                     ul.appendTo(fs);
                 });
+            }
+
+            function update_display(pipeline_id) {
+                console.log("update_display()");
+
+                update_configured_path();
 
                 /**
                  * Build the parameter forms.
@@ -154,17 +159,21 @@
                     if (parameters.length > 0) {
                         var ff2 = $('<fieldset></fieldset>').addClass("fieldset-auto-width");
                         var leg2 = $('<legend>' + elem + '</legend>');
+                        var table = $('<table></table>');
                         leg2.appendTo(ff2);
                         ff2.appendTo(form);
+                        table.appendTo(ff2);
 
                         parameters.forEach(function (p) {
-                            var div3 = $('<div style="border-width: 0; border-style : solid; border-color : black"></div>');
-                            div3.appendTo(ff2);
                             var param = p["parameter"];
                             switch (param["type"]) {
                                 case 'file':
+                                    var row = $('<tr></tr>').appendTo(table);
+                                    var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    row.append($('<td colspan="2"></td>').append(label));
+                                    var row = $('<tr></tr>').appendTo(table);
+                                    var cell = $('<td colspan="2"></td>').appendTo(row);
                                     if (use_dropzone) {
-                                        $("<span>" + param["name"] + "</span>").appendTo(div3);
                                         $("<div class='dropzone'></div>").dropzone({
                                             paramName: elem + "__" + param["name"],
                                             url: "PathBuild",
@@ -179,41 +188,42 @@
                                                     });
                                                 });
                                             }
-                                        }).appendTo(div3);
+                                        }).appendTo(cell);
                                     } else {
-                                        var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
                                         var name = elem + '__' + param["name"];
                                         files.push(name);
                                         var f = buildFile(name);
-                                        label.appendTo(div3);
-                                        f.appendTo(div3);
+                                        cell.append(f);
                                     }
                                     break;
                                 case 'select':
+                                    var row = $('<tr></tr>').appendTo(table);
                                     var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    row.append($('<td></td>').append(label));
                                     var name = elem + '__' + param["name"];
                                     var f = buildSelect(name, param["values"], param["value"]);
-                                    label.appendTo(div3);
-                                    f.appendTo(div3);
+                                    row.append($('<td></td>').append(f));
                                     break;
                                 case 'number':
+                                    var row = $('<tr></tr>').appendTo(table);
                                     var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    row.append($('<td></td>').append(label));
                                     var name = elem + '__' + param["name"];
                                     var f = buildNumber(name, param["value"]);
-                                    label.appendTo(div3);
-                                    f.appendTo(div3);
+                                    row.append($('<td></td>').append(f));
                                     break;
                                 case 'boolean':
+                                    var row = $('<tr></tr>').appendTo(table);
                                     var label = $('<label for="' + elem + '__' + param["name"] + '">' + param["name"] + '</label>');
+                                    row.append($('<td></td>').append(label));
                                     var name = elem + '__' + param["name"];
                                     var f = buildBoolean(name, param["value"]);
-                                    label.appendTo(div3);
-                                    f.appendTo(div3);
+                                    row.append($('<td></td>').append(f));
                                     break;
                                 case 'hidden':
                                     var name = elem + '__' + param["name"];
                                     var f = buildHidden(name, param["value"]);
-                                    f.appendTo(div3);
+                                    f.appendTo(ff2);
                                     break;
                                 default:
                                     console.log("unknown type: " + param["type"]);
