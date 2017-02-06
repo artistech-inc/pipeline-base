@@ -157,6 +157,7 @@ public abstract class DataBase {
     public String[] getRunKeys() {
         File f = new File(getConfigFile());
         ArrayList<String> runPath = new ArrayList<>();
+        runPath.add("");
         if (f.exists()) {
             try {
                 ArrayList readTree = MAPPER.readValue(f, ArrayList.class);
@@ -169,7 +170,6 @@ public abstract class DataBase {
                 Logger.getLogger(DataBase.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            runPath.add("");
             for (PipelineBean.Part part : this.path) {
                 String value = part.getOutputDir();
                 if (!runPath.contains(value)) {
