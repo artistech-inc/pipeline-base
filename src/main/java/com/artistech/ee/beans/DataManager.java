@@ -3,17 +3,21 @@
  */
 package com.artistech.ee.beans;
 
+import com.esotericsoftware.yamlbeans.YamlReader;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,10 +54,10 @@ public class DataManager {
             String formattedDateString = DateFormatUtils.ISO_8601_EXTENDED_DATETIME_FORMAT.format(lastModified);
             return formattedDateString;
         }
-        
+
         public String getConfig() {
             File config = new File(file.getAbsolutePath() + File.separator + DataBase.CONIFG_JSON);
-            if(config.exists()) {
+            if (config.exists()) {
                 try {
                     return FileUtils.readFileToString(config, Charset.defaultCharset());
                 } catch (IOException ex) {
@@ -62,6 +66,23 @@ public class DataManager {
             }
             return "";
         }
+    }
+
+    static {
+        try {
+            URL resource = Thread.currentThread().getContextClassLoader().getResource("pipeline.yml");
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+                YamlReader reader = new YamlReader(in);
+                Object object = reader.read();
+                Map map = (Map) object;
+                if(map.containsKey("data-path")) {
+                    dataPath = map.get("data-path").toString();
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(DataManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     public DataManager() {
@@ -93,7 +114,7 @@ public class DataManager {
         HashMap<String, File> stored = new HashMap<>();
         File f = new File(getDataPath());
         if (f.exists()) {
-            for(File file : f.listFiles()) {
+            for (File file : f.listFiles()) {
                 stored.put(file.getName(), file);
             }
         }

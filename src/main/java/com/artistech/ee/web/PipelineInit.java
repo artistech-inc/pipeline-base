@@ -28,8 +28,10 @@ public class PipelineInit implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         LOGGER.log(Level.FINER, "Context Initialized!");
-        String initParameter = sce.getServletContext().getInitParameter("data_path");
-        DataManager.setDataPath(initParameter);
+        if (DataManager.getDataPath() == null) {
+            String initParameter = sce.getServletContext().getInitParameter("data_path");
+            DataManager.setDataPath(initParameter);
+        }
     }
 
     /**

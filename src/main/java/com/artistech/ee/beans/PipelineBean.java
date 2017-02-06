@@ -202,6 +202,10 @@ public class PipelineBean {
         return map.get("data-object").toString();
     }
 
+    public String getDataDir() {
+        return map.get("data-path") != null ? map.get("data-path").toString() : null;
+    }
+
     public int getIndex() {
         return index;
     }

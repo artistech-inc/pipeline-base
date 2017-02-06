@@ -45,8 +45,8 @@
                     $('#' + parts_keys[ii] + '__div').hide();
                 }
                 $('#' + currStep + '__div').show();
-                $("table").find("tbody>tr:odd").css("background-color","#E5E4E2");
-                $("table").find("tbody>tr:even").css("background-color","#BCC6CC");
+                $("table").find("tbody>tr:odd").css("background-color", "#E5E4E2");
+                $("table").find("tbody>tr:even").css("background-color", "#BCC6CC");
             }
 
             function init() {
@@ -127,9 +127,18 @@
                     var body = $('<tbody></tbody>').appendTo(table);
 
                     var parameters = part["parameters"];
-                    if (parameters.length > 0) {
+                    var viz = 0;
+                    parameters.forEach(function (param) {
+                        if (param["type"] !== "hidden") {
+                            viz += 1;
+                        }
+                    });
+
+                    if (viz > 0) {
                         parameters.forEach(function (param) {
-                            $('<tr><td>' + param["name"] + '</td><td>' + param["value"] + '</td></tr>').appendTo(body);
+                            if (param["type"] !== "hidden") {
+                                $('<tr><td>' + param["name"] + '</td><td>' + param["value"] + '</td></tr>').appendTo(body);
+                            }
                         });
                     } else {
                         $('<tr><td>None</td><td>NA</td></tr>').appendTo(body);
@@ -154,7 +163,6 @@
                 current_parts.forEach(function (part) {
                     specified.push(part.name);
                 });
-//                select.appendTo(parent_tag);
 
                 var parent_tag2 = $('#part_config_div2');
                 parent_tag2.empty();
@@ -169,12 +177,24 @@
                     var form = $('<form id="' + elem + '__form" action="PathBuild" method="POST" enctype="multipart/form-data"></form>');
                     var parameters = yaml_config["parts"][elem]["parameters"];
 
+                    var viz = 0;
+                    parameters.forEach(function (p) {
+                        var param = p["parameter"];
+                        if (param["type"] !== "hidden") {
+                            viz += 1;
+                        }
+                    });
+
                     if (parameters.length > 0) {
                         var ff2 = $('<fieldset></fieldset>').addClass("fieldset-auto-width");
-                        var leg2 = $('<legend>' + elem + '</legend>');
                         var table = $('<table></table>');
-                        leg2.appendTo(ff2);
-                        ff2.appendTo(form);
+                        if (viz > 0) {
+                            ff2.append($('<legend>' + elem + '</legend>'));
+                            ff2.appendTo(form);
+                        } else {
+                            ff2 = $('<div></div>');
+                            ff2.appendTo(form);
+                        }
                         table.appendTo(ff2);
 
                         parameters.forEach(function (p) {
