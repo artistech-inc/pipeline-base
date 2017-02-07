@@ -7,9 +7,17 @@ package com.artistech.ee.web;
 import com.artistech.ee.beans.DataBase;
 import com.artistech.ee.beans.DataManager;
 import com.artistech.ee.beans.PipelineBean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,8 +27,10 @@ import javax.servlet.http.Part;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.event.EventListenerSupport;
 
 /**
+ * Add a new step in the process path.
  *
  * @author matta
  */
@@ -31,6 +41,11 @@ public class PathBuild extends HttpServlet {
 
     private static final int MAX_MEMORY_SIZE = 1024 * 1024 * 2;
     private static final int MAX_REQUEST_SIZE = 1024 * 1024;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    static {
+        MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+    }
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -72,8 +87,8 @@ public class PathBuild extends HttpServlet {
         upload.setSizeMax(MAX_REQUEST_SIZE);
 
         //do work...
-        Part part = request.getPart("pipeline_id");
-        String pipeline_id = IOUtils.toString(part.getInputStream(), "UTF-8");
+        Part param_part = request.getPart("pipeline_id");
+        String pipeline_id = IOUtils.toString(param_part.getInputStream(), "UTF-8");
         DataManager dataManagerBean = new DataManager();
         dataManagerBean.setPipeline_id(pipeline_id);
 
@@ -86,62 +101,92 @@ public class PathBuild extends HttpServlet {
 
         dataManagerBean.setData(data);
 
-        part = request.getPart("step_name");
-        String stepName = IOUtils.toString(part.getInputStream(), "UTF-8");
+        param_part = request.getPart("step_name");
+        String stepName = IOUtils.toString(param_part.getInputStream(), "UTF-8");
         PipelineBean pb = new PipelineBean();
-        PipelineBean.Part create = pb.createPart(stepName);
 
-        for (PipelineBean.Parameter p : create.getParameters()) {
-            part = request.getPart(stepName + "__" + p.getName());
-            if (part != null) {
-                //HANDLE THE INPUT!
-                System.out.println(p.getName());
+        Collection<Part> parts = request.getParts();
+        for (Part p : parts) {
+            Logger.getLogger(PathBuild.class.getName()).log(Level.WARNING, p.getName());
+        }
 
-                /**
-                 * Handle an enumerated (dropdown/select).
-                 */
-                if (p.getType().equals("select")) {
-                    String value = IOUtils.toString(part.getInputStream(), "UTF-8");
-                    p.setValue(value);
+        /**
+         * Loop through all pairings. This is a hack due to allowing multiple
+         * file uploads from dropzone.
+         */
+        int last_count = parts.size() + 1;
+        ArrayList<Part> toRemove = new ArrayList<>();
+        while (parts.size() != last_count) {
+            PipelineBean.Part create = pb.createPart(stepName);
+            last_count = parts.size();
+            for (PipelineBean.Parameter p : create.getParameters()) {
+                for (Part part : parts) {
+                    if (part.getName().startsWith(stepName + "__" + p.getName())) {
+                        toRemove.add(part);
+                        /**
+                         * Handle an enumerated (dropdown/select).
+                         */
+                        if (p.getType().equals("select")) {
+                            String value = IOUtils.toString(part.getInputStream(), "UTF-8");
+                            p.setValue(value);
+                        }
+
+                        /**
+                         * Handle Uploading a File.
+                         */
+                        if (p.getType().equals("file")) {
+                            String submittedFileName = part.getSubmittedFileName();
+                            if (submittedFileName == null || "".equals(submittedFileName.trim())) {
+                                MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
+                                return;
+                            }
+                            // be sure there is a file that was uploaded.
+                            submittedFileName = part.getSubmittedFileName();
+                            if (submittedFileName == null || "".equals(submittedFileName.trim())) {
+                                MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
+                                return;
+                            }
+                            p.setValue(submittedFileName);
+
+                            File dir = new File(data.getInput());
+                            if (!dir.exists()) {
+                                dir.mkdirs();
+                            }
+
+                            File f = new File(data.getInput() + File.separator + submittedFileName);
+                            if (f.exists()) {
+                                f.delete();
+                            }
+                            try (FileOutputStream fos = new FileOutputStream(f)) {
+                                IOUtils.copy(part.getInputStream(), fos, 1024);
+                            }
+                            break;
+                        }
+                    }
                 }
-
-                /**
-                 * Handle Uploading a File.
-                 */
-                if (p.getType().equals("file")) {
-                    // be sure there is a file that was uploaded.
-                    if ("".equals(part.getSubmittedFileName().trim())) {
-                        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-                                request, response);
-                        return;
-                    }
-                    p.setValue(part.getSubmittedFileName());
-
-                    File dir = new File(data.getInput());
-                    if (!dir.exists()) {
-                        dir.mkdirs();
-                    }
-
-                    String submittedFileName = part.getSubmittedFileName();
-                    if ("".equals(submittedFileName)) {
-                        // displays done.jsp page after upload finished
-                        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-                                request, response);
-                    }
-
-                    File f = new File(data.getInput() + File.separator + part.getSubmittedFileName());
-                    if (f.exists()) {
-                        f.delete();
-                    }
-                    try (FileOutputStream fos = new FileOutputStream(f)) {
-                        IOUtils.copy(part.getInputStream(), fos, 1024);
-                    }
-                }
+                parts.removeAll(toRemove);
+            }
+            if (create.getParameters().length == 0 || !toRemove.isEmpty()) {
+                data.addPart(create);
+                toRemove.clear();
             }
         }
-        data.addPart(create);
-        getServletContext().getRequestDispatcher("/pipeline.jsp?pipeline_id=" + pipeline_id).forward(
-                request, response);
+
+        writeConfig(data);
+        MAPPER.writeValue(response.getOutputStream(), data.getPipelineParts());
+    }
+
+    /**
+     * Write out the config.
+     *
+     * @param data
+     */
+    private void writeConfig(DataBase data) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(data.getConfigFile())))) {
+            MAPPER.writeValue(bw, data.getPipelineParts());
+        } catch (IOException ex) {
+            Logger.getLogger(PathBuild.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -180,7 +225,7 @@ public class PathBuild extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Add a new step in the process path.";
     }// </editor-fold>
 
 }

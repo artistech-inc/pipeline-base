@@ -1,25 +1,32 @@
-package com.artistech.ee.web;
-
 /*
  * Copyright 2017 ArtisTech, Inc.
  */
-import com.artistech.ee.beans.DataManager;
+package com.artistech.ee.web;
+
 import com.artistech.ee.beans.DataBase;
+import com.artistech.ee.beans.DataManager;
+import com.artistech.utils.ExternalProcess;
+import com.artistech.utils.StreamGobbler;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
+import org.apache.commons.io.IOUtils;
 
 /**
- * Get the latest output from the process.
+ * View an output file. Determine output mime-type from extension.
  *
  * @author matta
  */
-@WebServlet(name = "ProcessOutput", urlPatterns = {"/ProcessOutput"})
-public class ProcessOutput extends HttpServlet {
+@WebServlet(name = "InputFile", urlPatterns = {"/InputFile"})
+public class InputFile extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -32,16 +39,28 @@ public class ProcessOutput extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/plain;charset=UTF-8");
-        String pipeline_id = request.getParameter("pipeline_id");
+        Part pipeline_id_part = request.getPart("pipeline_id");
+        String pipeline_id = IOUtils.toString(pipeline_id_part.getInputStream(), "UTF-8");
         DataBase data = DataManager.getData(pipeline_id);
-
-        try (PrintWriter out = response.getWriter()) {
-            if (data.getProc() != null) {
-                String updateText = data.getProc().getGobbler().getUpdateText();
-                out.print(updateText);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
             }
-        }
+        });
+        t.start();
+
+        //enable writing to console log
+        PipedInputStream in = new PipedInputStream();
+        OutputStream os = new FileOutputStream(new File(data.getConsoleFile()), true);
+        StreamGobbler sg = new StreamGobbler(in, os);
+        sg.write("INPUT");
+        sg.start();
+        ExternalProcess ex_proc = new ExternalProcess(sg, t);
+        data.setProc(ex_proc);
+
+        // displays done.jsp page after upload finished
+        getServletContext().getRequestDispatcher("/watchProcess.jsp").forward(
+                request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -80,7 +99,7 @@ public class ProcessOutput extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Get the latest output from the process.";
+        return "InputFile Step";
     }// </editor-fold>
 
 }

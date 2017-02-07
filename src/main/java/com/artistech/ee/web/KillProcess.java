@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Kill the current process.
  *
  * @author matta
  */
@@ -80,7 +81,7 @@ public class KillProcess extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Kill the current process.";
     }// </editor-fold>
 
 }

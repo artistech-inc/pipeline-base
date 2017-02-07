@@ -3,8 +3,6 @@ package com.artistech.ee.web;
 /*
  * Copyright 2017 ArtisTech, Inc.
  */
-
-
 import com.artistech.ee.beans.DataManager;
 import com.artistech.ee.beans.DataBase;
 import java.io.IOException;
@@ -16,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Get if the current process is still running.
  *
  * @author matta
  */
@@ -39,10 +38,9 @@ public class ProcessMonitor extends HttpServlet {
         DataBase data = DataManager.getData(pipeline_id);
 
         try (PrintWriter out = response.getWriter()) {
-            if(data.getProc() != null) {
+            if (data.getProc() != null) {
                 out.print(data.getProc().isAlive());
-            }
-            else {
+            } else {
                 out.print(false);
             }
         }
@@ -84,7 +82,7 @@ public class ProcessMonitor extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Get if the current process is still running.";
     }// </editor-fold>
 
 }

@@ -1,25 +1,27 @@
-package com.artistech.ee.web;
-
 /*
  * Copyright 2017 ArtisTech, Inc.
  */
-import com.artistech.ee.beans.DataManager;
-import com.artistech.ee.beans.DataBase;
+package com.artistech.ee.web;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URL;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
 /**
- * Get the latest output from the process.
+ * Get the YAML config file.
  *
  * @author matta
  */
-@WebServlet(name = "ProcessOutput", urlPatterns = {"/ProcessOutput"})
-public class ProcessOutput extends HttpServlet {
+@WebServlet(name = "YamlConfig", urlPatterns = {"/YamlConfig"})
+public class YamlConfig extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -32,15 +34,11 @@ public class ProcessOutput extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/plain;charset=UTF-8");
-        String pipeline_id = request.getParameter("pipeline_id");
-        DataBase data = DataManager.getData(pipeline_id);
-
+        response.setContentType("text/yaml;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            if (data.getProc() != null) {
-                String updateText = data.getProc().getGobbler().getUpdateText();
-                out.print(updateText);
-            }
+            URL resource = Thread.currentThread().getContextClassLoader().getResource("pipeline.yml");
+            BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()));
+            IOUtils.copy(in, out);
         }
     }
 
@@ -80,7 +78,7 @@ public class ProcessOutput extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Get the latest output from the process.";
+        return "Get the YAML config file.";
     }// </editor-fold>
 
 }

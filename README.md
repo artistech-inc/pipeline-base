@@ -29,13 +29,37 @@ parts:
         requires:
             - input
         page: JointEre
-        parameters: []
+        parameters:
+            - parameter:
+                name: tagger
+                value: edu.rpi.jie.ere.joint.Tagger
+                values:
+                    - edu.rpi.jie.ere.joint.Tagger
+                type: select
+            - parameter:
+                name: model
+                value: models/joint/joint_model
+                values:
+                    - models/joint/joint_model
+                type: select
     enie:
         output-dir: enie_out
         requires:
             - input
         page: ENIE
-        parameters: []
+        parameters:
+            - parameter:
+                name: tagger
+                value: cuny.blender.englishie.ace.IETagger
+                values:
+                    - cuny.blender.englishie.ace.IETagger
+                type: select
+            - parameter:
+                name: property
+                value: props/enie.property
+                values:
+                    - props/enie.property
+                type: select
     merge:
         output-dir: merge_out
         requires:
@@ -43,7 +67,13 @@ parts:
             - joint_ere
             - enie
         page: Merge
-        parameters: []
+        parameters:
+            - parameter:
+                name: combiner
+                value: arl.workflow.combine.MergeEnieEre
+                values:
+                    - arl.workflow.combine.MergeEnieEre
+                type: select
     visualize:
         output-dir: viz_out
         requires:

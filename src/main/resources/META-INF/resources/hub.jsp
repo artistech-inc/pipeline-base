@@ -16,18 +16,17 @@
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
         <title>Hub</title>
         <link rel='stylesheet' href='style.css' type='text/css'>
-        <script type='text/javascript'>
-            var pipeline_id = "<c:out value="${dataBean.pipeline_id}" />";
-        </script>
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     </head>
     <body>
-        <h1><c:out value="${pipelineBean.name}" />: Data</h1>
+        <h1>Download</h1>
+        <a href="ZipDownload?pipeline_id=${dataBean.pipeline_id}">Download Zip</a>
+        <h1>${pipelineBean.name}: Data</h1>
         <c:forEach var="dataDir" items="${dataBean.data.runKeys}">
             <c:if test="${fn:length(dataBean.data.getFiles(dataDir)) gt 0}">
-                <ul><kbd><c:out value="${dataDir}"/></kbd> Files:
+                <ul><kbd>${dataDir}</kbd> Files:
                     <c:forEach var="dataFile" items="${dataBean.data.getFiles(dataDir)}">
-                        <li><a target="_blank" href="ViewRaw?stage=<c:out value="${dataDir}"/>&pipeline_id=<c:out value="${dataBean.pipeline_id}"/>&file=<c:out value="${dataFile}"/>"><c:out value="${dataFile}"/></a></li>
+                        <li><a target="_blank" href="ViewRaw?stage=${dataDir}&pipeline_id=${dataBean.pipeline_id}&file=${dataFile}">${dataFile}</a></li>
                         </c:forEach>
                 </ul>
             </c:if>

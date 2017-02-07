@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 /**
+ * View an output file. Determine output mime-type from extension.
  *
  * @author matta
  */
@@ -42,6 +43,8 @@ public class ViewRaw extends HttpServlet {
             response.setContentType("text/xml;charset=UTF-8");
         } else if (file.endsWith(".html")) {
             response.setContentType("text/html;charset=UTF-8");
+        } else if (file.endsWith(".json")) {
+            response.setContentType("text/json;charset=UTF-8");
         } else if (file.endsWith(".html")) {
             response.setContentType("text/plain;charset=UTF-8");
         }
@@ -90,7 +93,7 @@ public class ViewRaw extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "View output file";
     }// </editor-fold>
 
 }

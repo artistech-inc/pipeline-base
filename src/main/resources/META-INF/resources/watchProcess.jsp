@@ -15,20 +15,10 @@
         <link rel='stylesheet' href='style.css' type='text/css'>
         <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
         <script type='text/javascript'>
-            var pipeline_id = "<c:out value="${dataBean.pipeline_id}" />";
+            var pipeline_id = "${dataBean.pipeline_id}";
             var scroll_lock = false;
             var max_console = 500;
             var proc_alive = true;
-
-            function getXmlHttpObj() {
-                var xmlhttp = null;
-                if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
-                    xmlhttp = new XMLHttpRequest();
-                } else {// code for IE6, IE5
-                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-                }
-                return xmlhttp;
-            }
 
             function printConsole(message) {
                 var console = document.getElementById("console");
@@ -58,22 +48,20 @@
             }
 
             function getProcessOutput() {
-                var xmlhttp = getXmlHttpObj();
-
-                try {
-                    xmlhttp.open("POST", "ProcessOutput");
-                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    xmlhttp.send("pipeline_id=" + pipeline_id);
-                    xmlhttp.onreadystatechange = function ()
-                    {
-                        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                            proc_output_callback(xmlhttp.responseText); // Another callback here
-                        }
-                    };
-                } catch (err) {
-                    printConsole(err.message);
-                }
+                var formData = new FormData();
+                formData.append('pipeline_id', pipeline_id);
+                $.ajax({
+                    url: 'ProcessOutput',
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // tell jQuery not to process the data
+                    contentType: false, // tell jQuery not to set contentType
+                    success: function (data) {
+                        proc_output_callback(data);
+                    }
+                });
             }
+
             function proc_output_callback(data) {
                 printConsole(data);
                 if (proc_alive) {
@@ -82,22 +70,20 @@
             }
 
             function getProcessStatus() {
-                var xmlhttp = getXmlHttpObj();
-
-                try {
-                    xmlhttp.open("POST", "ProcessMonitor");
-                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    xmlhttp.send("pipeline_id=" + pipeline_id);
-                    xmlhttp.onreadystatechange = function ()
-                    {
-                        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                            proc_monitor_callback(xmlhttp.responseText); // Another callback here
-                        }
-                    };
-                } catch (err) {
-                    printConsole(err.message);
-                }
+                var formData = new FormData();
+                formData.append('pipeline_id', pipeline_id);
+                $.ajax({
+                    url: 'ProcessMonitor',
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // tell jQuery not to process the data
+                    contentType: false, // tell jQuery not to set contentType
+                    success: function (data) {
+                        proc_monitor_callback(data);
+                    }
+                });
             }
+
             function proc_monitor_callback(data) {
                 if (data === "false") {
                     $('#hub_link').unbind('click');
@@ -108,36 +94,33 @@
                     setTimeout("getProcessStatus()", 250);
                 }
             }
+
             function kill_proc() {
                 console.log("Killing Process");
-                var xmlhttp = getXmlHttpObj();
-
-                try {
-                    xmlhttp.open("POST", "KillProcess");
-                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    xmlhttp.send("pipeline_id=" + pipeline_id);
-                    xmlhttp.onreadystatechange = function ()
-                    {
-                        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                            console.log("Killed Process");
-//                            proc_monitor_callback(xmlhttp.responseText); // Another callback here
-                        }
-                    };
-                } catch (err) {
-                    printConsole(err.message);
-                }
+                var formData = new FormData();
+                formData.append('pipeline_id', pipeline_id);
+                $.ajax({
+                    url: 'KillProcess',
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // tell jQuery not to process the data
+                    contentType: false, // tell jQuery not to set contentType
+                    success: function (data) {
+                        console.log("Killed Process");
+                    }
+                });
             }
         </script>
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     </head>
     <body onload="init();">
-        <h1>Watch Process: <c:out value="${dataBean.data.currentParts.get(dataBean.data.pipelineIndex-1).name}" /></h1>
+        <h1>Watch Process: <c:out value="${dataBean.data.pipelineParts.get(dataBean.data.pipelineIndex-1).name}" /></h1>
         <br />
         <textarea id="console" rows="50" cols="85"></textarea>
         <br />
         <c:set value="${fn:length(dataBean.data.currentPath)}" var="specifed" />
         <c:if test="${dataBean.data.pipelineIndex lt specifed}">
-            <form name="continue_form" id="confinue_form" method="POST" action="${dataBean.data.currentParts.get(dataBean.data.pipelineIndex).page}" enctype="multipart/form-data">
+            <form name="continue_form" id="confinue_form" method="POST" action="${dataBean.data.pipelineParts.get(dataBean.data.pipelineIndex).page}" enctype="multipart/form-data">
             </c:if>
             <c:if test="${dataBean.data.pipelineIndex eq specifed}">
                 <form name="continue_form" id="confinue_form" method="POST" action="hub.jsp">

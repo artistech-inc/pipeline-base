@@ -1,12 +1,13 @@
-package com.artistech.ee.web;
-
 /*
  * Copyright 2017 ArtisTech, Inc.
  */
+package com.artistech.ee.web;
+
 import com.artistech.ee.beans.DataManager;
 import com.artistech.ee.beans.DataBase;
+import com.artistech.utils.ZipUtils;
+import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -14,12 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Get the latest output from the process.
+ * View an output file. Determine output mime-type from extension.
  *
  * @author matta
  */
-@WebServlet(name = "ProcessOutput", urlPatterns = {"/ProcessOutput"})
-public class ProcessOutput extends HttpServlet {
+@WebServlet(name = "ZipDownload", urlPatterns = {"/ZipDownload"})
+public class ZipDownload extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -32,15 +33,13 @@ public class ProcessOutput extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/plain;charset=UTF-8");
         String pipeline_id = request.getParameter("pipeline_id");
         DataBase data = DataManager.getData(pipeline_id);
-
-        try (PrintWriter out = response.getWriter()) {
-            if (data.getProc() != null) {
-                String updateText = data.getProc().getGobbler().getUpdateText();
-                out.print(updateText);
-            }
+        File file = new File(data.getPipelineDir());
+        if (file.exists() && file.isDirectory()) {
+            response.setContentType("application/zip");
+            response.setHeader("content-disposition", "inline; filename=\"" + pipeline_id + ".zip\"");
+            ZipUtils.zipFolder(file, response.getOutputStream());
         }
     }
 
@@ -80,7 +79,7 @@ public class ProcessOutput extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Get the latest output from the process.";
+        return "View output file";
     }// </editor-fold>
 
 }
