@@ -325,14 +325,10 @@
 
             function buildSelect(id, values, value) {
                 var select = $('<select id="' + id + '" name="' + id + '"></select>');
-                select.id = id;
                 values.forEach(function (val) {
-                    var option = $('<option value="' + val + '">' + val + '</option>');
-                    if (val === value) {
-                        option.select();
-                    }
-                    select.append(option);
+                    select.append($('<option value="' + val + '">' + val + '</option>'));
                 });
+                select.val(value);
                 return select;
             }
 
