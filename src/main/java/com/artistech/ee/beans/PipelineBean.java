@@ -3,7 +3,6 @@
  */
 package com.artistech.ee.beans;
 
-import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,9 +29,9 @@ public class PipelineBean {
     private Map map;
     private final Map<String, Part> parts;
     private int index;
-    
+
     public static final PipelineBean INSTANCE;
-    
+
     static {
         INSTANCE = new PipelineBean();
     }
@@ -72,11 +72,11 @@ public class PipelineBean {
             ArrayList list = (ArrayList) map.get("requires");
             requires = (String[]) list.toArray(new String[]{});
         }
-        
+
         public String getOutputDir() {
             return outputDir;
         }
-        
+
         public void setOutputDir(String value) {
             outputDir = value;
         }
@@ -171,22 +171,12 @@ public class PipelineBean {
     }
 
     public PipelineBean() {
+        map = PipelineBean.getPipelineConfig();
         parts = new HashMap<>();
-        try {
-            URL resource = Thread.currentThread().getContextClassLoader().getResource("pipeline.yml");
-            BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()));
-            YamlReader reader = new YamlReader(in);
-            Object object = reader.read();
-            map = (Map) object;
-            Map get = (Map) map.get("parts");
-            for (Object key : get.keySet()) {
-                Part p = new Part(key.toString(), (Map) get.get(key));
-                parts.put(key.toString(), p);
-            }
-        } catch (YamlException ex) {
-            Logger.getLogger(PipelineBean.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(PipelineBean.class.getName()).log(Level.SEVERE, null, ex);
+        Map get = (Map) map.get("parts");
+        for (Object key : get.keySet()) {
+            Part p = new Part(key.toString(), (Map) get.get(key));
+            parts.put(key.toString(), p);
         }
     }
 
@@ -254,4 +244,21 @@ public class PipelineBean {
         return parts.get(name).copy();
     }
 
+    public static Map getPipelineConfig() {
+        ServiceLoader<PipelineYamlUpdater> loader = ServiceLoader.load(PipelineYamlUpdater.class);
+        URL resource = Thread.currentThread().getContextClassLoader().getResource("pipeline.yml");
+        Map map = null;
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+            YamlReader reader = new YamlReader(in);
+            Object object = reader.read();
+            map = (Map) object;
+
+            for (PipelineYamlUpdater updater : loader) {
+                updater.updatePipeline(map);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(PipelineBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return map;
+    }
 }
